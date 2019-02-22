@@ -129,6 +129,11 @@ node
    {
        deployApp("${APP_NAME}-dev", "${MS_NAME}")
    }
+	
+   stage('Jmeter')
+   {
+       mvn -DJmeterTestFile=Click_link_through -DRampUp=10 -DLoopcount=2 -DThreadcount=3 verify
+   }	
 
    stage('Tagging Image for Testing')
    {
