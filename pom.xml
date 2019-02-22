@@ -132,28 +132,16 @@
          <plugin>
             <groupId>com.lazerycode.jmeter</groupId>
             <artifactId>jmeter-maven-plugin</artifactId>
-            <version>1.10.1</version>
+            <version>2.1.0</version>
             <executions>
-               <execution>
-                  <id>jmeter-tests</id>
-                  <phase>verify</phase>
-                  <goals>
-                     <goal>jmeter</goal>
-                  </goals>
-                  <configuration>
-                     <testFilesIncluded>
-                        <jMeterTestFile>${JmeterTestFile}.jmx</jMeterTestFile>
-                     </testFilesIncluded>
-                     <testResultsTimestamp>false</testResultsTimestamp>
-                     <propertiesUser>
-                        <Threadcount>${Threadcount}</Threadcount>
-                        <Loopcount>${Loopcount}</Loopcount>
-                        <Rampup>${RampUp}</Rampup>
-                     </propertiesUser>
-                  </configuration>
-               </execution>
+                <execution>
+                    <id>jmeter-tests</id>
+                    <goals>
+                        <goal>jmeter</goal>
+                    </goals>
+                </execution>
             </executions>
-         </plugin>
+        </plugin>
       </plugins>
    </build>
 </project>
