@@ -130,10 +130,10 @@ node
        deployApp("${APP_NAME}-dev", "${MS_NAME}")
    }
 	
-   stage('Jmeter')
+   /*stage('Jmeter')
    {
        sh 'mvn verify'
-   }	
+   }*/	
 
    stage('Tagging Image for Testing')
    {
