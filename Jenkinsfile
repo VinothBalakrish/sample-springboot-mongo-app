@@ -132,7 +132,7 @@ node
 	
    stage('Jmeter')
    {
-       mvn -DJmeterTestFile=Google_test_plan.jmx -DRampUp=10 -DLoopcount=2 -DThreadcount=3 verify
+       sh 'mvn verify'
    }	
 
    stage('Tagging Image for Testing')
