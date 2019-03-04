@@ -7,6 +7,7 @@ def readProperties(){
     env.BRANCH = property.BRANCH
     env.GIT_SOURCE_URL = property.GIT_SOURCE_URL
     env.SONAR_HOST_URL = property.SONAR_HOST_URL
+    env.CODE_QUALITY = property.CODE_QUALITY	
     
 }
 
@@ -104,11 +105,15 @@ node
    {
        sh 'mvn clean compile'
    }
-
-   stage('Code Quality Analysis')
+  
+   if(env.CODE_QUALITY == 'True')
    {
-       sh 'mvn sonar:sonar -Dsonar.host.url="${SONAR_HOST_URL}"'
+        stage('Code Quality Analysis')
+        {
+            sh 'mvn sonar:sonar -Dsonar.host.url="${SONAR_HOST_URL}"'
+        }
    }
+   
 
    stage('Unit Testing')
    {
