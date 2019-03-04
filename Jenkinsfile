@@ -7,7 +7,11 @@ def readProperties(){
     env.BRANCH = property.BRANCH
     env.GIT_SOURCE_URL = property.GIT_SOURCE_URL
     env.SONAR_HOST_URL = property.SONAR_HOST_URL
-    env.CODE_QUALITY = property.CODE_QUALITY	
+    env.CODE_QUALITY = property.CODE_QUALITY
+    env.UNIT_TESTING = property.UNIT_TESTING
+    env.CODE_COVERAGE = property.CODE_COVERAGE
+    env.INTEGRATION_TESTING = property.INTEGRATION_TESTING
+    env.SECURITY_TESTING = property.SECURITY_TESTING
     
 }
 
@@ -114,15 +118,20 @@ node
         }
    }
    
-
-   stage('Unit Testing')
+   if(env.UNIT_TESTING == 'True')
    {
-        sh 'mvn test'
+        stage('Unit Testing')
+   	{
+            sh 'mvn test'
+   	}
    }
-
-   stage('Code Coverage')
+   
+   if(env.CODE_COVERAGE == 'True')
    {
-	sh 'mvn package'
+        stage('Code Coverage')
+   	{
+	    sh 'mvn package'
+   	}
    }
 
    stage('Dev - Build Application')
@@ -135,11 +144,6 @@ node
        deployApp("${APP_NAME}-dev", "${MS_NAME}")
    }
 	
-   /*stage('Jmeter')
-   {
-       sh 'mvn verify'
-   }*/	
-
    stage('Tagging Image for Testing')
    {
        openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'test')
@@ -149,38 +153,44 @@ node
    {
        deployApp("${APP_NAME}-test", "${MS_NAME}")
    }
-	
-   node('selenium')
+   
+   if(env.INTEGRATION_TESTING == 'True')
    {
-	stage('Integration Testing')
-	{
-	    container('jnlp')
-	    {
-	         checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
-		 sh 'mvn integration-test'
-	    }
-	 }
-    }
-	
-    stage('Security Testing')
-    {
-        sh 'mvn findbugs:findbugs'
-    }	
-
-    stage('Tagging Image for Testing')
-    {
+        node('selenium')
+   	{
+		stage('Integration Testing')
+		{
+	    		container('jnlp')
+	    		{
+	         		checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
+		 		sh 'mvn integration-test'
+	    		}
+	 	}
+    	}
+   }
+   
+   if(env.SECURITY_TESTING == 'True')
+   {
+        stage('Security Testing')
+    	{
+        	sh 'mvn findbugs:findbugs'
+    	}	
+   }	
+   
+   stage('Tagging Image for Testing')
+   {
         openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'prod')
-    }	
+   }	
     
-    stage('Deploy to Production approval')
-    {
+   stage('Deploy to Production approval')
+   {
        input "Deploy to Production Environment?"
-    }
+   }
 	
-    stage('Prod - Deploy Application')
-    {
+   stage('Prod - Deploy Application')
+   {
        deployApp("${APP_NAME}-prod", "${MS_NAME}")
-    }	
+   }	
  
 }
 }	
