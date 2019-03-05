@@ -22,7 +22,12 @@ def firstTimeDevDeployment(projectName,msName){
             def bcExists = bcSelector.exists()
             if (!bcExists) {
                 openshift.newApp("redhat-openjdk18-openshift:1.1~${GIT_SOURCE_URL}","--strategy=source")
-                sh 'sleep 290'
+                def rm = openshift.selector("dc", msName).rollout()
+                timeout(15) { 
+                  openshift.selector("dc", msName).related('pods').untilEach(1) {
+                    return (it.object().status.phase == "Running")
+                  }
+                }
                 openshiftTag(namespace: projectName, srcStream: msName, srcTag: 'latest', destStream: msName, destTag: 'test')
                 openshiftTag(namespace: projectName, srcStream: msName, srcTag: 'latest', destStream: msName, destTag: 'prod')
             } else {
