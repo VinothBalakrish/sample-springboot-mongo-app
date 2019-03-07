@@ -12,7 +12,7 @@ def readProperties(){
     env.CODE_COVERAGE = property.CODE_COVERAGE
     env.INTEGRATION_TESTING = property.INTEGRATION_TESTING
     env.SECURITY_TESTING = property.SECURITY_TESTING
-    
+    env.SONAR_PROJECT_KEY = property.SONAR_PROJECT_KEY
 }
 
 def firstTimeDevDeployment(projectName,msName){
@@ -83,6 +83,16 @@ def deployApp(projectName,msName){
     }
 }
 
+def checkStatus(sonarProjectKey, sonarHostURL){
+    sh "curl "+sonarHostURL+"/api/qualitygates/project_status?projectKey="+sonarProjectKey+" > status.json"
+    def json = readJSON file:'status.json'
+    echo "${json.projectStatus.status}"
+    if ("${json.projectStatus.status}" != "OK") {
+        currentBuild.result = 'FAILURE'
+        error('SonarQube quality gate status of a project is invalid.')
+    }	
+}
+
 podTemplate(cloud:'openshift',label: 'selenium', 
   containers: [
     containerTemplate(
@@ -101,8 +111,8 @@ node
    stage('First Time Deployment'){
         readProperties()
         firstTimeDevDeployment("${APP_NAME}-dev", "${MS_NAME}")
-        firstTimeTestDeployment("${APP_NAME}-dev", "${APP_NAME}-test", "${MS_NAME}")
-        firstTimeProdDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
+        //firstTimeTestDeployment("${APP_NAME}-dev", "${APP_NAME}-test", "${MS_NAME}")
+        //firstTimeProdDeployment("${APP_NAME}-dev", "${APP_NAME}-prod", "${MS_NAME}")
    }
    
    stage('Checkout')
@@ -115,14 +125,6 @@ node
        sh 'mvn clean compile'
    }
   
-   if(env.CODE_QUALITY == 'True')
-   {
-        stage('Code Quality Analysis')
-        {
-            sh 'mvn sonar:sonar -Dsonar.host.url="${SONAR_HOST_URL}"'
-        }
-   }
-   
    if(env.UNIT_TESTING == 'True')
    {
         stage('Unit Testing')
@@ -130,13 +132,23 @@ node
             sh 'mvn test'
    	}
    }
-   
+	
    if(env.CODE_COVERAGE == 'True')
    {
         stage('Code Coverage')
    	{
-	    sh 'mvn package'
+	     jacoco()
+	     sh 'mvn package'
    	}
+   }
+	
+   if(env.CODE_QUALITY == 'True')
+   {
+        stage('Code Quality Analysis')
+        {
+            sh 'mvn sonar:sonar -Dsonar.host.url="${SONAR_HOST_URL}"'
+	    checkStatus(env.SONAR_PROJECT_KEY, "${SONAR_HOST_URL}")
+        }
    }
 
    stage('Dev - Build Application')
@@ -148,7 +160,7 @@ node
    {
        deployApp("${APP_NAME}-dev", "${MS_NAME}")
    }
-	
+   /*	
    stage('Tagging Image for Testing')
    {
        openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'test')
@@ -167,7 +179,7 @@ node
 		{
 	    		container('jnlp')
 	    		{
-	         		checkout([$class: 'GitSCM', branches: [[name: "*/${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
+	         		checkout([$class: 'GitSCM', branches: [[name: "*//*${BRANCH}"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: "${GIT_SOURCE_URL}"]]])
 		 		sh 'mvn integration-test'
 	    		}
 	 	}
@@ -196,6 +208,6 @@ node
    {
        deployApp("${APP_NAME}-prod", "${MS_NAME}")
    }	
- 
+   */
 }
 }	
