@@ -24,4 +24,4 @@ oc policy add-role-to-user edit system:serviceaccount:springboot-mongo-demo-cicd
 oc policy add-role-to-user edit system:serviceaccount:springboot-mongo-demo-cicd:jenkins -n springboot-mongo-demo-test
 oc policy add-role-to-user edit system:serviceaccount:springboot-mongo-demo-cicd:jenkins -n springboot-mongo-demo-prod
 
-oc new-app https://github.com/sourabhgupta385/sample-springboot-mysql-app.git --strategy=pipeline --name=springboot-mongo-demo-pipeline -n springboot-mongo-demo-cicd
+oc new-app https://github.com/sourabhgupta385/sample-springboot-mongo-app.git --strategy=pipeline --name=springboot-mongo-demo-pipeline -n springboot-mongo-demo-cicd
