@@ -5,6 +5,7 @@ GIT_SOURCE_URL: 'https://github.com/sourabhgupta385/spring-boot-mongodb-example.
 SONAR_HOST_URL: 'http://sonar-springboot-mongo-demo-cicd.52.172.12.252.nip.io'
 CODE_QUALITY: 'True'
 UNIT_TESTING: 'True'
-CODE_COVERAGE: 'False'
+CODE_COVERAGE: 'True'
 INTEGRATION_TESTING: 'True'
 SECURITY_TESTING: 'True'
+SONAR_PROJECT_KEY: 'com.techprimers.mongodb:spring-boot-mongodb-example'
