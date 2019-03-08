@@ -194,7 +194,7 @@ node
     	}	
    }	
    
-   stage('Tagging Image for Testing')
+   stage('Tagging Image for Production')
    {
         openshiftTag(namespace: '$APP_NAME-dev', srcStream: '$MS_NAME', srcTag: 'latest', destStream: '$MS_NAME', destTag: 'prod')
    }	
