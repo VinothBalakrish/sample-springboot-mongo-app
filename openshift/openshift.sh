@@ -1,5 +1,6 @@
 #Give actual value of token before running this file
-oc login https://masterdnsj2p5wq2nzrzvo.southindia.cloudapp.azure.com:443 --token=
+# oc login https://masterdnsj2p5wq2nzrzvo.southindia.cloudapp.azure.com:443 --token=
+oc login --token=sha256~U4VusVXd-qC_RjeTCuAHzXzCPDdv8C3JMmVB5g51HVo --server=https://api.shared-410.openshift.redhatworkshops.io:6443
 
 oc new-project springboot-mongo-demo-cicd
 
